@@ -12,7 +12,7 @@ namespace ScreenshotExtension
         /// <remarks>Only PNG image file supported!</remarks>
         public static void GetFullPageScreenshot(this IWebDriver driver, string fileName)
         {
-            Page.GetInstance(driver).GetFullScreenShot(fileName);
+            new Page(driver).GetFullScreenShot(fileName);
         }
     }
 }
