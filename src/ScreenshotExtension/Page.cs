@@ -11,24 +11,11 @@ namespace ScreenshotExtension
     public class Page
     {
         private IWebDriver _driver;
-        private static Page instance = null;
-        private static readonly object Instancelock = new object();
-        private Page(IWebDriver driver)
+        public Page(IWebDriver driver)
         {
             _driver = driver;
         }
 
-        public static Page GetInstance(IWebDriver driver)
-        {
-            lock (Instancelock)
-            {
-                if (instance == null)
-                {
-                    instance = new Page(driver);
-                }
-                return instance;
-            }
-        }
         public int Width
         {
             get
