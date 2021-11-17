@@ -47,19 +47,19 @@ namespace ScreenshotExtension
         {
             get
             {
-                var rawValue = _driver.ExecuteJavaScript<object>($"return window.scrollY").ToString();
+                var rawValue = _driver.ExecuteJavaScript<object>($"window.scrollY").ToString();
                 return (int)Convert.ToDouble(rawValue);
             }
         }
 
         public void ScrollTo(int x, int y)
         {
-            _driver.ExecuteJavaScript($"return window.scrollTo({x}, {y});");
+            _driver.ExecuteJavaScript($"window.scrollTo({x}, {y});");
         }
 
         public void ScrollTo(int y)
         {
-            _driver.ExecuteJavaScript($"return window.scrollTo(0, {y});");
+            _driver.ExecuteJavaScript($"window.scrollTo(0, {y});");
         }
 
         public int ViewWidth
