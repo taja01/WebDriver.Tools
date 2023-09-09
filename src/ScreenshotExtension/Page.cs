@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 
 namespace ScreenshotExtension
 {
@@ -38,7 +39,7 @@ namespace ScreenshotExtension
         {
             get
             {
-                var rawValue = _driver.ExecuteJavaScript<object>($"return window.scrollX").ToString();
+                var rawValue = _driver.ExecuteJavaScript<object>("return window.scrollX").ToString();
                 return int.Parse(rawValue);
             }
         }
@@ -47,7 +48,7 @@ namespace ScreenshotExtension
         {
             get
             {
-                var rawValue = _driver.ExecuteJavaScript<object>($"window.scrollY").ToString();
+                var rawValue = _driver.ExecuteJavaScript<object>("return window.scrollY").ToString();
                 return (int)Convert.ToDouble(rawValue);
             }
         }
@@ -79,7 +80,7 @@ namespace ScreenshotExtension
                 return int.Parse(rawValue);
             }
         }
-
+#pragma warning disable CA1416 // Validate platform compatibility
         public void GetFullScreenShot(string fileName)
         {
             //Ideal world would be if IWebDriver has GetFullPageScreenshot method...
@@ -90,44 +91,52 @@ namespace ScreenshotExtension
             }
             else
             {
-
-                ScrollTo(0, 0);
-                var pageHeight = Height;
-                var viewWidth = ViewWidth;
-                var windowHeight = ViewHeight;
-
-                if (windowHeight < pageHeight)
+                try
                 {
-                    var imageList = GetScreenShots(pageHeight, windowHeight);
+                    ScrollTo(0, 0);
+                    var pageHeight = Height;
+                    var windowHeight = ViewHeight;
 
-                    var bitmap = new Bitmap(viewWidth, pageHeight);
-
-                    var current = 0;
-                    using (var g = Graphics.FromImage(bitmap))
+                    if (windowHeight < pageHeight)
                     {
-                        for (int i = 0; i < imageList.Count; i++)
-                        {
-                            var currentImage = ConvertToImage(imageList[i].AsByteArray);
+                        var imageList = GetScreenShots(pageHeight, windowHeight);
 
-                            if (i == imageList.Count - 1)
+                        var images = imageList.Select(s => ConvertToImage(s.AsByteArray));
+
+                        var currentImage = images.First();
+
+                        var fullScreenshotImage = new Bitmap(currentImage.Width, pageHeight);
+
+                        var windowHeightActualPosition = 0;
+                        using (var g = Graphics.FromImage(fullScreenshotImage))
+                        {
+                            for (int i = 0; i < images.Count(); i++)
                             {
-                                current -= windowHeight - (pageHeight - ((pageHeight / windowHeight) * windowHeight));
-                                g.DrawImage(currentImage, 0, current);
-                            }
-                            else
-                            {
-                                g.DrawImage(currentImage, 0, current);
-                                current += windowHeight;
+                                currentImage = images.ElementAt(i);
+
+                                if (i == imageList.Count - 1)
+                                {
+                                    windowHeightActualPosition -= windowHeight - (pageHeight - ((pageHeight / windowHeight) * windowHeight));
+                                    g.DrawImage(currentImage, 0, windowHeightActualPosition);
+                                }
+                                else
+                                {
+                                    g.DrawImage(currentImage, 0, windowHeightActualPosition);
+                                    windowHeightActualPosition += windowHeight;
+                                }
                             }
                         }
+
+                        fullScreenshotImage.Save(fileName, System.Drawing.Imaging.ImageFormat.Png);
                     }
-
-                    bitmap.Save(fileName, System.Drawing.Imaging.ImageFormat.Png);
-
+                    else
+                    {
+                        CreateScreenShot().SaveAsFile(fileName, ScreenshotImageFormat.Png);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    CreateScreenShot().SaveAsFile(fileName, ScreenshotImageFormat.Png);
+                    throw new Exception("Failed to create Screenshot with Extension", ex);
                 }
             }
         }
@@ -164,3 +173,4 @@ namespace ScreenshotExtension
         }
     }
 }
+#pragma warning restore CA1416 // Validate platform compatibility

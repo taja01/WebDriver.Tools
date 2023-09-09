@@ -44,7 +44,6 @@ namespace ScreenshotExtensionTest
         [Test]
         public void Test1()
         {
-
             driver.Url = "https://en.wikipedia.org/wiki/Main_Page";
 
             driver.GetFullPageScreenshot("chrome_test_long_page.png");
