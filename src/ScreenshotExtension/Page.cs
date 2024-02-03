@@ -131,7 +131,7 @@ namespace ScreenshotExtension
                     }
                     else
                     {
-                        CreateScreenShot().SaveAsFile(fileName, ScreenshotImageFormat.Png);
+                        CreateScreenShot().SaveAsFile(fileName);
                     }
                 }
                 catch (Exception ex)
